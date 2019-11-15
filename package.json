@@ -1,0 +1,130 @@
+{
+	"name": "quick-notes",
+	"displayName": "Quick Notes",
+	"description": "A tool for taking notes quickly",
+	"version": "0.0.1",
+	"publisher": "quick-notes",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/stanaka/vscode-quick-notes.git"
+	},
+	"engines": {
+		"vscode": "^1.39.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onView:fileExplorer",
+		"onCommand:fileExplorer.quickNotesCreateNewNote",
+		"onCommand:extension.quickNotes"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "quick-notes-explorer",
+					"title": "Quick Notes Explorer",
+					"icon": "resources/quick-notes-dark.svg"
+				}
+			]
+		},
+		"views": {
+			"quick-notes-explorer": [
+				{
+					"id": "fileExplorer",
+					"name": "Quick Notes"
+				}
+			]
+		},
+		"commands": [
+			{
+				"command": "fileExplorer.quickNotesCreateNewNote",
+				"title": "Quick Notes: Create a new note",
+				"icon": {
+					"light": "resources/new-note-light.svg",
+					"dark": "resources/new-note-dark.svg"
+				}
+			},
+			{
+				"command": "fileExplorer.refreshFile",
+				"title": "Refresh",
+				"icon": {
+					"light": "resources/light/refresh.svg",
+					"dark": "resources/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "fileExplorer.filter",
+				"title": "filter",
+				"icon": {
+					"light": "resources/light/filter.svg",
+					"dark": "resources/dark/filter.svg"
+				}
+			},
+			{
+				"command": "fileExplorer.openFile",
+				"title": "Open File"
+			},
+			{
+				"command": "extension.quickNotes",
+				"title": "Quick Notes"
+			}
+		],
+		"menus": {
+			"view/title": [
+				{
+					"command": "fileExplorer.quickNotesCreateNewNote",
+					"when": "view == fileExplorer",
+					"group": "navigation"
+				},
+				{
+					"command": "fileExplorer.filter",
+					"when": "view == fileExplorer",
+					"group": "navigation"
+				},
+				{
+					"command": "fileExplorer.refreshFile",
+					"when": "view == fileExplorer",
+					"group": "navigation"
+				}
+			]
+		},
+		"configuration": {
+			"type": "object",
+			"title": "Quick Notes Configuration",
+			"properties": {
+				"quickNotes.basePath": {
+					"type": "string",
+					"default": "~/Documents/QuickNotes",
+					"description": "Base Directory"
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile",
+		"test": "node ./out/test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/glob": "^7.1.1",
+		"@types/mkdirp": "^0.5.2",
+		"@types/mocha": "^5.2.6",
+		"@types/node": "^10.12.21",
+		"@types/rimraf": "^2.0.2",
+		"@types/vscode": "^1.39.0",
+		"glob": "^7.1.5",
+		"mocha": "^6.1.4",
+		"tslint": "^5.12.1",
+		"typescript": "^3.3.1",
+		"vscode-test": "^1.2.0"
+	},
+	"dependencies": {
+		"mkdirp": "^0.5.1",
+		"rimraf": "^2.6.2"
+	}
+}
