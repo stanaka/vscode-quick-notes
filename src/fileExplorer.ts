@@ -276,6 +276,7 @@ export class FileSystemProvider
         return new FileStat(await _.stat(path))
     }
 
+    // this readDirectory function returns empty array regardless the uri.
     readDirectory(
         uri: vscode.Uri
     ): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
@@ -487,8 +488,9 @@ export class FileExplorer {
             treeDataProvider,
         })
         this.treeDataProvider = treeDataProvider
-        vscode.commands.registerCommand('fileExplorer.openFile', (resource) =>
-            this.openResource(resource)
+        vscode.commands.registerCommand(
+            'fileExplorer.openFile',
+            (resource: vscode.Uri) => this.openResource(resource)
         )
         vscode.commands.registerCommand(
             'fileExplorer.quickNotesCreateNewNote',
@@ -497,14 +499,14 @@ export class FileExplorer {
         vscode.commands.registerCommand('fileExplorer.refreshFile', () =>
             this.treeDataProvider.refresh()
         )
-        vscode.commands.registerCommand('fileExplorer.filter', () => {
-            this.filter()
+        vscode.commands.registerCommand('fileExplorer.filter', async () => {
+            await this.filter()
             this.treeDataProvider.refresh()
         })
     }
 
-    private openResource(resource: vscode.Uri): void {
-        vscode.window.showTextDocument(resource)
+    private async openResource(resource: vscode.Uri): Promise<void> {
+        await vscode.window.showTextDocument(resource)
     }
 
     private isFolderDescriptor(filepath: string): boolean {
@@ -512,7 +514,7 @@ export class FileExplorer {
     }
 
     private createFileOrFolder(absolutePath: string): void {
-        let directoryToFile = path.dirname(absolutePath)
+        const directoryToFile = path.dirname(absolutePath)
 
         if (!fs.existsSync(absolutePath)) {
             if (this.isFolderDescriptor(absolutePath)) {
@@ -524,9 +526,9 @@ export class FileExplorer {
         }
     }
 
-    private newNote(): void {
+    private async newNote(): Promise<void> {
         console.log('newNote')
-        this._newNote()
+        await this._newNote()
     }
 
     private async _newNote(): Promise<void> {
@@ -539,11 +541,11 @@ export class FileExplorer {
 
         const now = new Date()
         const year = now.getFullYear()
-        const month = ('0' + (now.getMonth() + 1)).slice(-2)
-        const date = ('0' + now.getDate()).slice(-2)
-        const hour = ('0' + now.getHours()).slice(-2)
-        const min = ('0' + now.getMinutes()).slice(-2)
-        const sec = ('0' + now.getSeconds()).slice(-2)
+        const month = ('0' + (now.getMonth() + 1).toString()).slice(-2)
+        const date = ('0' + now.getDate().toString()).slice(-2)
+        const hour = ('0' + now.getHours().toString()).slice(-2)
+        const min = ('0' + now.getMinutes().toString()).slice(-2)
+        const sec = ('0' + now.getSeconds().toString()).slice(-2)
 
         const fileName = `${year}/${month}/${year}-${month}-${date}-${hour}${min}${sec}.md`
         const initialContents = `# \n[${year}-${month}-${date} ${hour}:${min}]`
@@ -563,8 +565,8 @@ export class FileExplorer {
             })
 
             const position = editor.selection.active
-            var newPosition = position.with(0, 2)
-            var newSelection = new vscode.Selection(newPosition, newPosition)
+            const newPosition = position.with(0, 2)
+            const newSelection = new vscode.Selection(newPosition, newPosition)
             editor.selection = newSelection
         }
     }
