@@ -7,7 +7,7 @@ import { moveCursor } from 'readline';
 import * as utils from './utils';
 
 //#region Utilities
-
+/* eslint-disable @typescript-eslint/no-namespace, no-inner-declarations */
 namespace _ {
 	function handleResult<T>(resolve: (result: T) => void, reject: (error: Error) => void, error: Error | null | undefined, result: T): void {
 		if (error) {
@@ -95,8 +95,15 @@ namespace _ {
 	}
 
 	export function mkdir(path: string): Promise<void> {
+		// export function mkdir(path: string): Promise<string | undefined> {
+			//return mkdirp(path)
+		// return new Promise<void>((resolve, reject) => {
+		// 	mkdirp(path, undefined, error => handleResult(resolve, reject, error, void 0));
+		// });
 		return new Promise<void>((resolve, reject) => {
-			mkdirp(path, error => handleResult(resolve, reject, error, void 0));
+			mkdirp(path)
+			.then(() => {resolve()})
+			.catch((err)=> {reject(err)})
 		});
 	}
 
@@ -175,7 +182,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 	refresh(): void {
 		console.log("aaa");
 
-		this._onDidChangeTreeData.fire();
+		this._onDidChangeTreeData.fire(undefined);
 	}
 
 	watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
