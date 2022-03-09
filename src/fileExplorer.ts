@@ -400,6 +400,7 @@ export class FileSystemProvider
             `${rgPath}`,
             '--files-with-matches',
             '--sortr=modified',
+            '--ignore-case',
         ]
         if (this.filter === '') {
             execBuf.push('.')
