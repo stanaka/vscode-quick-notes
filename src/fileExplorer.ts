@@ -3,7 +3,6 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as mkdirp from 'mkdirp'
 import * as rimraf from 'rimraf'
-import { moveCursor } from 'readline'
 import * as utils from './utils'
 
 import { rgPath } from '@vscode/ripgrep'
@@ -279,9 +278,9 @@ export class FileSystemProvider
     }
 
     // this readDirectory function returns empty array regardless the uri.
-    readDirectory(
-        uri: vscode.Uri
-    ): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
+    readDirectory():
+        | [string, vscode.FileType][]
+        | Thenable<[string, vscode.FileType][]> {
         const result: [string, vscode.FileType][] = []
         return Promise.resolve(result)
     }
@@ -400,13 +399,15 @@ export class FileSystemProvider
             childProcess.stdout.on('data', (data: NodeJS.ReadableStream) => {
                 const lines = data.toString().split(/(\r?\n)/g)
                 lines.forEach((l) => {
-                    if (l !== '\n' && l !== '') {
+                    if (l !== '\n' && l !== '' && count <= 100) {
                         stdout.push(l)
                         count++
                     }
                 })
+                console.log('getting result: ', count)
                 if (count > 100) {
                     // usually it's over 100.
+                    childProcess.kill()
                     resolve(stdout)
                 }
             })
@@ -436,7 +437,7 @@ export class FileSystemProvider
             return []
         }
         console.log('getChildren: path: ', basePath)
-        const uri = vscode.Uri.file(basePath)
+        // const uri = vscode.Uri.file(basePath)
 
         const execBuf = [
             `${rgPath}`,
@@ -450,8 +451,13 @@ export class FileSystemProvider
             execBuf.push(`${this.filter}`)
         }
         console.log(execBuf)
-        const matches = await this.exec(execBuf, basePath)
-        console.log('matches are', matches)
+        let matches: string[] = []
+        try {
+            matches = await this.exec(execBuf, basePath)
+            console.log('the num of matches is ', matches.length)
+        } catch (e) {
+            console.error(e)
+        }
 
         const matchFiles = []
         for (let i = 0; i < matches.length; i++) {
@@ -533,7 +539,7 @@ export class FileExplorer {
 
     readonly treeDataProvider: FileSystemProvider
 
-    constructor(context: vscode.ExtensionContext) {
+    constructor() {
         const treeDataProvider = new FileSystemProvider()
         this.fileExplorer = vscode.window.createTreeView('fileExplorer', {
             treeDataProvider,
