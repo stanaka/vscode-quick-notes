@@ -9,15 +9,10 @@
         "url": "https://github.com/stanaka/vscode-quick-notes.git"
     },
     "engines": {
-        "vscode": "^1.63.2"
+        "vscode": "^1.74.0"
     },
     "categories": [
         "Other"
-    ],
-    "activationEvents": [
-        "onView:fileExplorer",
-        "onCommand:fileExplorer.quickNotesCreateNewNote",
-        "onCommand:extension.quickNotes"
     ],
     "main": "./out/extension.js",
     "contributes": {
@@ -123,7 +118,7 @@
         "glob": "^7.2.0",
         "mocha": "^9.2.0",
         "typescript": "^4.5.5",
-        "vscode-test": "^1.6.1"
+        "@vscode/test-electron": "^1.6.1"
     },
     "dependencies": {
         "@vscode/ripgrep": "^1.14.2",
