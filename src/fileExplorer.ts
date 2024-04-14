@@ -7,7 +7,9 @@ import { moveCursor } from 'readline'
 import * as utils from './utils'
 
 import { rgPath } from '@vscode/ripgrep'
-import { exec } from 'child_process'
+// import { exec } from 'child_process'
+import { spawn } from 'child_process'
+//import * as child_process from 'child_process'
 
 //#region Utilities
 /* eslint-disable @typescript-eslint/no-namespace, no-inner-declarations, @typescript-eslint/no-misused-promises */
@@ -88,8 +90,8 @@ namespace _ {
     export function readBeginning(path: string): Promise<Buffer> {
         return new Promise<Buffer>((resolve, reject) => {
             fs.open(path, 'r', (err, fd) => {
-                const buff = Buffer.alloc(100)
-                fs.read(fd, buff, 0, 100, 0, (error, byteReads, buffer) =>
+                const buff = Buffer.alloc(1000)
+                fs.read(fd, buff, 0, 1000, 0, (error, byteReads, buffer) =>
                     handleResult(resolve, reject, error, buffer)
                 )
             })
@@ -366,22 +368,62 @@ export class FileSystemProvider
         return _.rename(oldUri.fsPath, newUri.fsPath)
     }
 
+    // async exec(execBuf: string[], cwd: string): Promise<string[]> {
+    //     execBuf.push(cwd) // need to specify path
+
+    //     return new Promise(function (resolve, reject) {
+    //         const execString = execBuf.join(' ')
+    //         child_process.exec(
+    //             // child_process.spawn(
+    //             execString,
+    //             { cwd: cwd, timeout: 30000 },
+    //             (error, stdout, stderr) => {
+    //                 if (!error || (error && stderr === '')) {
+    //                     resolve(stdout.split('\n'))
+    //                 } else {
+    //                     reject()
+    //                 }
+    //             }
+    //         )
+    //     })
+    // }
+
     async exec(execBuf: string[], cwd: string): Promise<string[]> {
         execBuf.push(cwd) // need to specify path
-
         return new Promise(function (resolve, reject) {
-            const execString = execBuf.join(' ')
-            exec(
-                execString,
-                { cwd: cwd, timeout: 30000 },
-                (error, stdout, stderr) => {
-                    if (!error || (error && stderr === '')) {
-                        resolve(stdout.split('\n'))
-                    } else {
-                        reject()
+            const childProcess = spawn(execBuf[0], execBuf.slice(1), {
+                cwd: cwd,
+            })
+            const stdout: string[] = []
+            let stderr = ''
+            let count = 0
+            childProcess.stdout.on('data', (data: NodeJS.ReadableStream) => {
+                const lines = data.toString().split(/(\r?\n)/g)
+                lines.forEach((l) => {
+                    if (l !== '\n' && l !== '') {
+                        stdout.push(l)
+                        count++
                     }
+                })
+                if (count > 100) {
+                    // usually it's over 100.
+                    resolve(stdout)
                 }
-            )
+            })
+            childProcess.stderr.on('data', (data: NodeJS.ReadableStream) => {
+                stderr += data.toString()
+            })
+
+            childProcess.on('close', (code) => {
+                if (code === 0) {
+                    resolve(stdout)
+                } else {
+                    reject(new Error(stderr))
+                }
+            })
+            childProcess.on('error', (err) => {
+                reject(err)
+            })
         })
     }
 
@@ -409,27 +451,16 @@ export class FileSystemProvider
         }
         console.log(execBuf)
         const matches = await this.exec(execBuf, basePath)
-        /*
-		const matchFiles = matches.map(async (name) => {
-			if (name !== "") {
-				// console.log(name);
-				const stat = await this._stat(name);
-				const contents = await this.readFile(vscode.Uri.file(name));
-				const description = contents.toString();
-				[stat.mtime, vscode.Uri.file(name), description];
-			}
-		})*/
-        console.log(matches)
+        console.log('matches are', matches)
 
         const matchFiles = []
         for (let i = 0; i < matches.length; i++) {
             const name = matches[i]
             if (name !== '') {
-                // console.log(name);
+                // console.log('name', name)
                 const stat = await this._stat(name)
                 const uri = vscode.Uri.file(name)
                 // const contents = await this.readFile(vscode.Uri.file(name));
-                // console.log(name)
                 const contents = await this.readBeginning(uri) // .toString('utf8', 0, 100);
                 const description = contents.toString()
                 // console.log(description)
@@ -461,17 +492,36 @@ export class FileSystemProvider
                 title: 'Open File',
                 arguments: [element.uri],
             }
-            treeItem.label = element.description
-                .split('\n')[0]
-                .replace(/^# ?/, '')
+            const regexYAMLFrontmatter = /---\n.*?\n---\n/s
+            const description = element.description
+                // remove YAML frontmatter (https://pandoc.org/MANUAL.html#extension-yaml_metadata_block)
+                .replace(regexYAMLFrontmatter, '')
+
+            // use the first line as a label
+            const label = description.split('\n')[0].replace(/^# ?/, '')
+            // try to remove a datetime part from the label
+            const label_without_date = label.replace(
+                /[0-9]+-[0-9]+-[0-9]+-[0-9]+ /,
+                ''
+            )
+            // if it's empty, then use the not-removed label
+            if (label_without_date.match(/^ *$/)) {
+                treeItem.label = label
+            } else {
+                treeItem.label = label_without_date
+            }
+
             treeItem.tooltip = element.uri.fsPath
-            const firstRowEndPos = element.description.indexOf('\n', 0)
-            treeItem.description = element.description
-                .substr(firstRowEndPos + 1)
+            const firstRowEndPos = description.indexOf('\n', 0)
+
+            treeItem.description = description
+                // remove the first line as it's used as a label
+                .substring(firstRowEndPos + 1)
                 .replace(/\n/g, ' ')
                 .replace(/\[[0-9]+-[0-9]+-[0-9]+ [0-9]+:[0-9]+\]/, '')
                 .replace(/ +/g, ' ')
                 .replace(/^ /, '')
+            // console.log(treeItem.description)
             treeItem.contextValue = 'file'
         }
         return treeItem
