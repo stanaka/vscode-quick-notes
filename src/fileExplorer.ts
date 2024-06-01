@@ -4,6 +4,7 @@ import * as fs from 'fs'
 import * as mkdirp from 'mkdirp'
 import * as rimraf from 'rimraf'
 import * as utils from './utils'
+import * as moment from 'moment'
 
 import { rgPath } from '@vscode/ripgrep'
 // import { exec } from 'child_process'
@@ -583,6 +584,24 @@ export class FileExplorer {
         }
     }
 
+    private async getNewNoteContent(): Promise<string> {
+        let content = (
+            await fs.promises.readFile(utils.getTemplatePath())
+        ).toString()
+
+        if (content == '') {
+            content = '# {{date:YYYY-MM-DD HH:mm}}'
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+        content = content.replaceAll(/{{date(?::([^}]+))?}}/g, (match, p1) => {
+            const dateFormat = p1 != undefined ? (p1 as string) : 'YYYY-MM-DD'
+            return moment().format(dateFormat)
+        })
+
+        return content
+    }
+
     private async newNote(): Promise<void> {
         console.log('newNote')
         await this._newNote()
@@ -605,7 +624,8 @@ export class FileExplorer {
         const sec = ('0' + now.getSeconds().toString()).slice(-2)
 
         const fileName = `${year}/${month}/${year}-${month}-${date}-${hour}${min}${sec}.md`
-        const initialContents = `# \n[${year}-${month}-${date} ${hour}:${min}]`
+
+        const initialContents = await this.getNewNoteContent()
 
         const newFile = path.join(basePath, fileName)
         this.createFileOrFolder(newFile)

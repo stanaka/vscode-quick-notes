@@ -13,3 +13,16 @@ export function getBasePath(): string {
     }
     return basePath
 }
+
+export function getTemplatePath(): string {
+    const basePath = vscode.workspace
+        .getConfiguration('quickNotes')
+        .get('templatePath', '')
+
+    if (basePath[0] === '~') {
+        if (process.env.HOME !== undefined) {
+            return path.join(process.env.HOME, basePath.slice(1))
+        }
+    }
+    return basePath
+}
