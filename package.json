@@ -2,7 +2,7 @@
     "name": "quick-notes",
     "displayName": "Quick Notes",
     "description": "A tool for taking notes quickly",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "publisher": "quick-notes",
     "repository": {
         "type": "git",
