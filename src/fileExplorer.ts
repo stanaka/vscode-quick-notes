@@ -639,8 +639,11 @@ export class FileExplorer {
                 edit.insert(new vscode.Position(0, 0), initialContents)
             })
 
-            const position = editor.selection.active
-            const newPosition = position.with(0, 2)
+            let cursor = utils.findLocationOfContent(initialContents)
+            if (initialContents.startsWith('# ', cursor)) {
+                cursor += 2
+            }
+            const newPosition = editor.document.positionAt(cursor)
             const newSelection = new vscode.Selection(newPosition, newPosition)
             editor.selection = newSelection
         }

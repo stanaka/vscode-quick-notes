@@ -34,3 +34,11 @@ export function isUnderBasePath(pathA: string): boolean {
     }
     return false
 }
+
+export function findLocationOfContent(content: string): number {
+    const regexYAMLFrontmatter = /---\n.*?\n---\n/gs
+    if (regexYAMLFrontmatter.test(content)) {
+        return regexYAMLFrontmatter.lastIndex
+    }
+    return 0
+}
