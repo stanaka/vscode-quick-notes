@@ -1,6 +1,7 @@
 import * as vscode from 'vscode'
 import * as matter from 'gray-matter'
 import * as moment from 'moment'
+import * as utils from './utils'
 
 export const handlerSaveEvent = (event: vscode.TextDocumentWillSaveEvent) => {
     if (
@@ -12,8 +13,23 @@ export const handlerSaveEvent = (event: vscode.TextDocumentWillSaveEvent) => {
     }
 
     const document = event.document
+    if (!utils.isUnderBasePath(document.uri.path)) {
+        console.log(
+            `The file: ${
+                document.uri.path
+            } is not under the base path ${utils.getBasePath()}`
+        )
+        return
+    }
 
     const fileContents = document.getText()
+    if (matter.test(fileContents) == false) {
+        console.log(
+            `The file: ${document.uri.path} doesn't contain front-matter`
+        )
+        return
+    }
+
     const properties = matter(fileContents)
 
     const dateFormat = vscode.workspace

@@ -26,3 +26,11 @@ export function getTemplatePath(): string {
     }
     return basePath
 }
+
+export function isUnderBasePath(pathA: string): boolean {
+    const relative = path.relative(getBasePath(), pathA)
+    if (relative && !relative.startsWith('..') && !path.isAbsolute(relative)) {
+        return true
+    }
+    return false
+}
