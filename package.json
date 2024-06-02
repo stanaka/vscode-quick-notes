@@ -99,6 +99,21 @@
                     "type": "string",
                     "default": "~/Documents/QuickNotes/template.md",
                     "description": "Template file for a new note"
+                },
+                "quickNotes.enableUpdateLastModifiedPropertyOnSave": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "A flag to update last modified property on save"
+                },
+                "quickNotes.lastModifiedProperty": {
+                    "type": "string",
+                    "default": "updated",
+                    "description": "Property shows last modified date and time. This property will be updated when the file is saved."
+                },
+                "quickNotes.lastModifiedPropertyFormat": {
+                    "type": "string",
+                    "default": "YYYY-MM-DDTHH:mm:ssZ",
+                    "description": "Date time format of last modified property"
                 }
             }
         }
@@ -127,6 +142,7 @@
     },
     "dependencies": {
         "@vscode/ripgrep": "^1.15.9",
+        "gray-matter": "^4.0.3",
         "mkdirp": "^1.0.4",
         "moment": "^2.30.1",
         "rimraf": "^3.0.2"

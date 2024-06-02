@@ -585,10 +585,16 @@ export class FileExplorer {
     }
 
     private async getNewNoteContent(): Promise<string> {
-        let content = (
-            await fs.promises.readFile(utils.getTemplatePath())
-        ).toString()
+        const templatePath = utils.getTemplatePath()
 
+        let content = ''
+        if (!fs.existsSync(templatePath)) {
+            console.log("templatePath '" + templatePath + "' doesn't exist.")
+        } else {
+            content = (
+                await fs.promises.readFile(utils.getTemplatePath())
+            ).toString()
+        }
         if (content == '') {
             content = '# {{date:YYYY-MM-DD HH:mm}}'
         }
@@ -615,15 +621,7 @@ export class FileExplorer {
         }
         console.log('_newNote: ', basePath)
 
-        const now = new Date()
-        const year = now.getFullYear()
-        const month = ('0' + (now.getMonth() + 1).toString()).slice(-2)
-        const date = ('0' + now.getDate().toString()).slice(-2)
-        const hour = ('0' + now.getHours().toString()).slice(-2)
-        const min = ('0' + now.getMinutes().toString()).slice(-2)
-        const sec = ('0' + now.getSeconds().toString()).slice(-2)
-
-        const fileName = `${year}/${month}/${year}-${month}-${date}-${hour}${min}${sec}.md`
+        const fileName = moment().format('YYYY/MM/YYYY-MM-DD-HHmmss') + '.md'
 
         const initialContents = await this.getNewNoteContent()
 
