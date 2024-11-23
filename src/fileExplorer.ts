@@ -1,8 +1,6 @@
 import * as vscode from 'vscode'
 import * as path from 'path'
 import * as fs from 'fs'
-import * as mkdirp from 'mkdirp'
-import * as rimraf from 'rimraf'
 import * as utils from './utils'
 import * as moment from 'moment'
 
@@ -123,28 +121,7 @@ namespace _ {
     }
 
     export function rmrf(path: string): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            rimraf(path, (error) =>
-                handleResult(resolve, reject, error, void 0)
-            )
-        })
-    }
-
-    export function mkdir(path: string): Promise<void> {
-        // export function mkdir(path: string): Promise<string | undefined> {
-        //return mkdirp(path)
-        // return new Promise<void>((resolve, reject) => {
-        // 	mkdirp(path, undefined, error => handleResult(resolve, reject, error, void 0));
-        // });
-        return new Promise<void>((resolve, reject) => {
-            mkdirp(path)
-                .then(() => {
-                    resolve()
-                })
-                .catch((err) => {
-                    reject(err)
-                })
-        })
+        return fs.promises.rm(path, { recursive: true, force: true })
     }
 
     export function rename(oldPath: string, newPath: string): Promise<void> {
@@ -245,7 +222,12 @@ export class FileSystemProvider
         const watcher = fs.watch(
             uri.fsPath,
             { recursive: options.recursive },
-            async (event: string, filename: string | Buffer) => {
+            async (event: string, filename: string | Buffer | null) => {
+                if (!filename) {
+                    // filename was not provided.
+                    console.log('filename was not provided.')
+                    return
+                }
                 const filepath = path.join(
                     uri.fsPath,
                     _.normalizeNFC(filename.toString())
@@ -286,8 +268,8 @@ export class FileSystemProvider
         return Promise.resolve(result)
     }
 
-    createDirectory(uri: vscode.Uri): void | Thenable<void> {
-        return _.mkdir(uri.fsPath)
+    async createDirectory(uri: vscode.Uri): Promise<void> {
+        await fs.promises.mkdir(uri.fsPath, { recursive: true })
     }
 
     readBeginning(uri: vscode.Uri): Uint8Array | Thenable<Uint8Array> {
@@ -317,7 +299,9 @@ export class FileSystemProvider
                 throw vscode.FileSystemError.FileNotFound()
             }
 
-            await _.mkdir(path.dirname(uri.fsPath))
+            await fs.promises.mkdir(path.dirname(uri.fsPath), {
+                recursive: true,
+            })
         } else {
             if (!options.overwrite) {
                 throw vscode.FileSystemError.FileExists()
@@ -327,12 +311,12 @@ export class FileSystemProvider
         return _.writefile(uri.fsPath, content as Buffer)
     }
 
-    delete(
+    async delete(
         uri: vscode.Uri,
         options: { recursive: boolean }
-    ): void | Thenable<void> {
+    ): Promise<void> {
         if (options.recursive) {
-            return _.rmrf(uri.fsPath)
+            await fs.promises.rm(uri.fsPath, { recursive: true, force: true })
         }
 
         return _.unlink(uri.fsPath)
@@ -362,7 +346,9 @@ export class FileSystemProvider
 
         const parentExists = await _.exists(path.dirname(newUri.fsPath))
         if (!parentExists) {
-            await _.mkdir(path.dirname(newUri.fsPath))
+            await fs.promises.mkdir(path.dirname(newUri.fsPath), {
+                recursive: true,
+            })
         }
 
         return _.rename(oldUri.fsPath, newUri.fsPath)
@@ -571,14 +557,14 @@ export class FileExplorer {
         return filepath.charAt(filepath.length - 1) === path.sep
     }
 
-    private createFileOrFolder(absolutePath: string): void {
+    private async createFileOrFolder(absolutePath: string): Promise<void> {
         const directoryToFile = path.dirname(absolutePath)
 
         if (!fs.existsSync(absolutePath)) {
             if (this.isFolderDescriptor(absolutePath)) {
-                mkdirp.sync(absolutePath)
+                await fs.promises.mkdir(absolutePath, { recursive: true })
             } else {
-                mkdirp.sync(directoryToFile)
+                await fs.promises.mkdir(directoryToFile, { recursive: true })
                 fs.appendFileSync(absolutePath, '')
             }
         }
@@ -626,7 +612,7 @@ export class FileExplorer {
         const initialContents = await this.getNewNoteContent()
 
         const newFile = path.join(basePath, fileName)
-        this.createFileOrFolder(newFile)
+        await this.createFileOrFolder(newFile)
         const textDocument = await vscode.workspace.openTextDocument(newFile)
 
         console.log('_newNote: ', textDocument)
