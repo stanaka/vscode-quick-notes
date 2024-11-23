@@ -100,6 +100,11 @@
                     "default": "~/Documents/QuickNotes/template.md",
                     "description": "Template file for a new note"
                 },
+                "quickNotes.notePathPattern": {
+                    "type": "string",
+                    "default": "'YYYY/MM/YYYY-MM-DD-HHmmss[.md]'",
+                    "description": "Path pattern for a new note. Quick Note uses moment.js to format."
+                },
                 "quickNotes.enableUpdateLastModifiedPropertyOnSave": {
                     "type": "boolean",
                     "default": false,

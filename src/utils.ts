@@ -27,6 +27,14 @@ export function getTemplatePath(): string {
     return basePath
 }
 
+export function getNotePathPattern(): string {
+    const notePathPattern = vscode.workspace
+        .getConfiguration('quickNotes')
+        .get('notePathPattern', '')
+
+    return notePathPattern
+}
+
 export function isUnderBasePath(pathA: string): boolean {
     const relative = path.relative(getBasePath(), pathA)
     if (relative && !relative.startsWith('..') && !path.isAbsolute(relative)) {

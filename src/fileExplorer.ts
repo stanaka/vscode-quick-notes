@@ -606,8 +606,10 @@ export class FileExplorer {
             return
         }
         console.log('_newNote: ', basePath)
+        const notePathPattern =
+            utils.getNotePathPattern() || 'YYYY/MM/YYYY-MM-DD-HHmmss[.md]'
 
-        const fileName = moment().format('YYYY/MM/YYYY-MM-DD-HHmmss') + '.md'
+        const fileName = moment().format(notePathPattern)
 
         const initialContents = await this.getNewNoteContent()
 
