@@ -1,6 +1,6 @@
 {
-    "name": "quick-notes",
-    "displayName": "Quick Notes",
+    "name": "quick-note",
+    "displayName": "Quick Note",
     "description": "A tool for taking notes quickly",
     "version": "0.0.6",
     "publisher": "ShinjiTanaka",
