@@ -582,7 +582,14 @@ export class FileExplorer {
             ).toString()
         }
         if (content == '') {
-            content = '# {{date:YYYY-MM-DD HH:mm}}'
+            content = `---
+created: {{date:YYYY-MM-DDTHH:mm:ssZ}}
+updated: {{date:YYYY-MM-DDTHH:mm:ssZ}}
+tags: 
+---
+# {{date:YYYY-MM-DD-HHmm}}
+
+[{{date:YYYY-MM-DD HH:mm}}]`
         }
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
