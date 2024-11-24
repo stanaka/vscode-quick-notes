@@ -102,7 +102,7 @@
                 },
                 "quickNotes.notePathPattern": {
                     "type": "string",
-                    "default": "'YYYY/MM/YYYY-MM-DD-HHmmss[.md]'",
+                    "default": "YYYY/MM/YYYY-MM-DD-HHmmss[.md]",
                     "description": "Path pattern for a new note. Quick Note uses moment.js to format."
                 },
                 "quickNotes.enableUpdateLastModifiedPropertyOnSave": {
