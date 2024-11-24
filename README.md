@@ -90,8 +90,9 @@ tags:
 - Property shows last modified date and time. This property will be updated when the file is saved. Default: "updated"
 - Date time format of last modified property. Default: "YYYY-MM-DDTHH:mm:ssZ"
 
-# Workaround to use ripgrep v14
+# Known issues
 
+## Workaround to use ripgrep v14
 Quick notes depends on `@vscode/ripgrep` to search notes and filter them. Currently ripgrep v13 used but this version has a bug in a sorting logic (https://github.com/BurntSushi/ripgrep/issues/2243) and it's fixed in v14. Upgrading ripgrep to v14 is in a backlog (https://github.com/microsoft/ripgrep-prebuilt/issues/38). Before it's shipped, you can replace ripgrep binary manually as a workaround.
 
 # Appendix
