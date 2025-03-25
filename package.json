@@ -2,7 +2,7 @@
     "name": "quick-note",
     "displayName": "Quick Note",
     "description": "A tool for taking notes quickly",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "publisher": "ShinjiTanaka",
     "license": "SEE LICENSE IN LICENSE",
     "icon": "resources/quick-notes.png",
@@ -121,6 +121,11 @@
                     "type": "string",
                     "default": "YYYY-MM-DDTHH:mm:ssZ",
                     "description": "Date time format of last modified property"
+                },
+                "quickNotes.todoCountProperty": {
+                    "type": "string",
+                    "default": "todoCount",
+                    "description": "Property name that shows the count of completed tasks versus total tasks"
                 }
             }
         }
