@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import * as path from 'path'
 import * as fs from 'fs'
 import * as utils from './utils'
-import * as moment from 'moment'
+import moment from 'moment'
 
 import { rgPath } from '@vscode/ripgrep'
 // import { exec } from 'child_process'
@@ -10,7 +10,7 @@ import { spawn } from 'child_process'
 //import * as child_process from 'child_process'
 
 //#region Utilities
-/* eslint-disable @typescript-eslint/no-namespace, no-inner-declarations, @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/no-namespace, @typescript-eslint/no-misused-promises */
 
 namespace _ {
     function handleResult<T>(
@@ -244,7 +244,7 @@ export class FileSystemProvider
                                 ? vscode.FileChangeType.Created
                                 : vscode.FileChangeType.Deleted,
                         uri: uri.with({ path: filepath }),
-                    } as vscode.FileChangeEvent,
+                    },
                 ])
             }
         )
@@ -383,7 +383,7 @@ export class FileSystemProvider
             const stdout: string[] = []
             let stderr = ''
             let count = 0
-            childProcess.stdout.on('data', (data: NodeJS.ReadableStream) => {
+            childProcess.stdout.on('data', (data: Buffer) => {
                 const lines = data.toString().split(/(\r?\n)/g)
                 lines.forEach((l) => {
                     if (l !== '\n' && l !== '' && count <= 100) {
@@ -398,7 +398,7 @@ export class FileSystemProvider
                     resolve(stdout)
                 }
             })
-            childProcess.stderr.on('data', (data: NodeJS.ReadableStream) => {
+            childProcess.stderr.on('data', (data: Buffer) => {
                 stderr += data.toString()
             })
 
@@ -592,7 +592,6 @@ tags:
 [{{date:YYYY-MM-DD HH:mm}}]`
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
         content = content.replaceAll(/{{date(?::([^}]+))?}}/g, (match, p1) => {
             const dateFormat = p1 != undefined ? (p1 as string) : 'YYYY-MM-DD'
             return moment().format(dateFormat)

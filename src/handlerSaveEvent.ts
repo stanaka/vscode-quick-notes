@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
-import * as matter from 'gray-matter'
-import * as moment from 'moment'
+import matter from 'gray-matter'
+import moment from 'moment'
 import * as utils from './utils'
 
 export const handlerSaveEvent = (event: vscode.TextDocumentWillSaveEvent) => {
