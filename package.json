@@ -154,6 +154,6 @@
     "dependencies": {
         "@vscode/ripgrep": "^1.18.0",
         "gray-matter": "^4.0.3",
-        "moment": "^2.30.1"
+        "moment": "^2.31.0"
     }
 }
